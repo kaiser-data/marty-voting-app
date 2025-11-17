@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marty-deployment-result
+  namespace: marty
+  labels:
+    app: marty-result
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: marty-result
+  template:
+    metadata:
+      labels:
+        app: marty-result
+    spec:
+      containers:
+        - name: result
+          image: kaiserdata/result:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: POSTGRES_HOST
+              value: "marty-svc-postgres"
+            - name: POSTGRES_DB
+              value: "votes"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: marty-db-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: marty-db-credentials
+                  key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marty-svc-result
+  namespace: marty
+  labels:
+    app: marty-result
+spec:
+  type: ClusterIP
+  selector:
+    app: marty-result
+  ports:
+    - port: 80
+      targetPort: 80

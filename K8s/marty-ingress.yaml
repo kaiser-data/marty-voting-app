@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: marty-ingress-voting-app
+  namespace: marty
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /vote
+            pathType: Prefix
+            backend:
+              service:
+                name: marty-svc-vote
+                port:
+                  number: 80
+          - path: /result
+            pathType: Prefix
+            backend:
+              service:
+                name: marty-svc-result
+                port:
+                  number: 80

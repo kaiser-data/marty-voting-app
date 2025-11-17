@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marty-deployment-postgres
+  namespace: marty
+  labels:
+    app: marty-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: marty-postgres
+  template:
+    metadata:
+      labels:
+        app: marty-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "votes"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: marty-db-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: marty-db-credentials
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marty-svc-postgres
+  namespace: marty
+  labels:
+    app: marty-postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: marty-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

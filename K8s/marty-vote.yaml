@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marty-deployment-vote
+  namespace: marty
+  labels:
+    app: marty-vote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: marty-vote
+  template:
+    metadata:
+      labels:
+        app: marty-vote
+    spec:
+      containers:
+        - name: vote
+          image: kaiserdata/vote:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: REDIS_HOST
+              value: "marty-svc-redis"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marty-svc-vote
+  namespace: marty
+  labels:
+    app: marty-vote
+spec:
+  type: ClusterIP
+  selector:
+    app: marty-vote
+  ports:
+    - port: 80
+      targetPort: 80

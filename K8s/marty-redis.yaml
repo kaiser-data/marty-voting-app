@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marty-deployment-redis
+  namespace: marty
+  labels:
+    app: marty-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: marty-redis
+  template:
+    metadata:
+      labels:
+        app: marty-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          args: ["--appendonly", "yes"]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marty-svc-redis
+  namespace: marty
+  labels:
+    app: marty-redis
+spec:
+  type: ClusterIP
+  selector:
+    app: marty-redis
+  ports:
+    - port: 6379
+      targetPort: 6379

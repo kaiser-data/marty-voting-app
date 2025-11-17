@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marty-deployment-worker
+  namespace: marty
+  labels:
+    app: marty-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: marty-worker
+  template:
+    metadata:
+      labels:
+        app: marty-worker
+    spec:
+      containers:
+        - name: worker
+          image: kaiserdata/worker:latest
+          env:
+            - name: REDIS_HOST
+              value: "marty-svc-redis"
+            - name: POSTGRES_HOST
+              value: "marty-svc-postgres"
+            - name: POSTGRES_DB
+              value: "votes"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: marty-db-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: marty-db-credentials
+                  key: POSTGRES_PASSWORD

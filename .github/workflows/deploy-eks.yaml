@@ -1,0 +1,50 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Login to Docker Hub
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      # 3️⃣ Build Docker images
+      - name: Build Docker images
+        run: |
+          docker build -t kaiserdata/vote:latest ./vote
+          docker build -t kaiserdata/result:latest ./result
+          docker build -t kaiserdata/worker:latest ./worker
+
+      # 4️⃣ Push images
+      - name: Push Docker images
+        run: |
+          docker push kaiserdata/vote:latest
+          docker push kaiserdata/result:latest
+          docker push kaiserdata/worker:latest
+
+      # 5️⃣ Install AWS CLI
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      # 6️⃣ Configure kubectl to talk to shared EKS cluster
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ironhack-main --region us-east-2
+
+      # 7️⃣ Apply Kubernetes manifests (namespace marty)
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f K8s/
