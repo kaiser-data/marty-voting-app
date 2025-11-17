@@ -42,7 +42,7 @@ jobs:
       # 6️⃣ Configure kubectl to talk to shared EKS cluster
       - name: Update kubeconfig
         run: |
-          aws eks update-kubeconfig --name ironhack-main --region ${{ secrets.AWS_REGION }}
+          aws eks update-kubeconfig --name ironhack-main-2 --region ${{ secrets.AWS_REGION }}
 
       # 7️⃣ Apply Kubernetes manifests (namespace marty)
       - name: Deploy to EKS
