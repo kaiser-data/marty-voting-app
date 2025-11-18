@@ -3,23 +3,24 @@ kind: Ingress
 metadata:
   name: marty-ingress
   namespace: marty
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
-    - host: marty.ironhack.com
+    - host: vote.marty.ironhack.com
       http:
         paths:
-          - path: /vote(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: marty-svc-vote
                 port:
                   number: 80
-          - path: /result(/|$)(.*)
-            pathType: ImplementationSpecific
+    - host: result.marty.ironhack.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: marty-svc-result

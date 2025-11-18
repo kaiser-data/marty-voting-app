@@ -44,7 +44,21 @@ jobs:
         run: |
           aws eks update-kubeconfig --name ironhack-main-2 --region ${{ secrets.AWS_REGION }}
 
-      # 7️⃣ Apply Kubernetes manifests (namespace marty)
+      # 7️⃣ Create namespace if needed
+      - name: Create namespace
+        run: |
+          kubectl create namespace marty --dry-run=client -o yaml | kubectl apply -f -
+
+      # 8️⃣ Create Kubernetes secrets from GitHub secrets
+      - name: Create database credentials secret
+        run: |
+          kubectl create secret generic marty-db-credentials \
+            --from-literal=POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+            --from-literal=POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            --namespace=marty \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      # 9️⃣ Apply Kubernetes manifests
       - name: Deploy to EKS
         run: |
           kubectl apply -f K8s/
