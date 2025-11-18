@@ -5,141 +5,119 @@ paginate: true
 style: |
   @import 'default';
 
-  /* Harmonious Color Palette */
+  /* Professional Color Palette */
   :root {
-    --primary-dark: #0f172a;
-    --primary-blue: #1e40af;
-    --accent-blue: #3b82f6;
-    --light-bg: #f8fafc;
-    --text-light: #e2e8f0;
-    --border-color: #cbd5e1;
-    --success: #059669;
-    --warning: #f59e0b;
-    --error: #dc2626;
+    --navy: #1e3a8a;
+    --blue: #2563eb;
+    --sky: #0ea5e9;
+    --slate: #334155;
   }
 
-  /* Base Section Styling */
+  /* Base Styling - REDUCED HEIGHT */
   section {
-    background: var(--primary-dark);
-    color: var(--text-light);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    padding: 50px 60px;
+    background: white;
+    color: var(--slate);
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    padding: 40px 70px 50px 70px;
     font-size: 24px;
+    line-height: 1.5;
   }
 
-  /* Typography Hierarchy - Harmonized */
+  /* Typography - COMPACT */
   h1 {
-    color: white;
-    font-size: 2.5em;
+    color: var(--navy);
+    font-size: 2.3em;
     font-weight: 700;
-    margin-bottom: 0.4em;
-    line-height: 1.2;
+    margin: 0 0 0.4em 0;
+    line-height: 1.1;
   }
 
   h2 {
-    color: white;
-    font-size: 1.8em;
+    color: var(--blue);
+    font-size: 1.7em;
     font-weight: 600;
-    margin-bottom: 0.5em;
-    margin-top: 0.3em;
-    line-height: 1.3;
+    margin: 0.5em 0 0.4em 0;
+    line-height: 1.2;
   }
 
   h3 {
-    color: #60a5fa;
-    font-size: 1.3em;
+    color: var(--sky);
+    font-size: 1.2em;
     font-weight: 600;
-    margin: 0.6em 0 0.3em 0;
-    line-height: 1.3;
+    margin: 0.4em 0 0.3em 0;
+    line-height: 1.2;
   }
 
-  /* Paragraphs and Lists */
-  p, li {
-    font-size: 0.95em;
-    line-height: 1.5;
+  /* Text Elements - COMPACT */
+  p {
     margin-bottom: 0.4em;
+    line-height: 1.5;
   }
 
   ul, ol {
-    margin: 0.5em 0;
+    margin: 0.4em 0;
     padding-left: 1.5em;
   }
 
   li {
-    margin-bottom: 0.3em;
+    margin-bottom: 0.35em;
+    line-height: 1.4;
   }
 
-  /* Code Blocks - Compact */
+  strong {
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  /* Code Blocks - COMPACT & READABLE */
   pre {
-    background: #1e293b !important;
-    border-radius: 8px;
-    padding: 0.8em 1em !important;
+    background: #f1f5f9 !important;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.8em !important;
     margin: 0.5em 0 !important;
-    font-size: 0.7em !important;
+    font-size: 0.65em !important;
     line-height: 1.4;
-    border-left: 3px solid var(--accent-blue);
+    color: var(--slate) !important;
+  }
+
+  pre code {
+    background: transparent !important;
+    color: var(--slate) !important;
+    font-family: 'Consolas', 'Monaco', monospace;
   }
 
   code {
-    background: rgba(59, 130, 246, 0.15);
-    padding: 0.15em 0.3em;
+    background: #f1f5f9;
+    color: var(--navy);
+    padding: 0.15em 0.35em;
     border-radius: 3px;
     font-size: 0.85em;
-  }
-
-  /* Strong Text */
-  strong {
-    color: #60a5fa;
-    font-weight: 600;
+    font-family: 'Consolas', monospace;
   }
 
   /* Links */
   a {
-    color: #60a5fa;
+    color: var(--blue);
     text-decoration: none;
-    border-bottom: 1px solid #60a5fa;
+    border-bottom: 1px solid var(--blue);
   }
 
-  /* Lead Slides - Title Slides */
-  section.lead {
-    text-align: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  /* Dark Header Slides */
+  section.dark {
+    background: var(--navy);
+    color: white;
   }
 
-  section.lead h1 {
-    font-size: 3em;
-    margin-bottom: 0.3em;
+  section.dark h1,
+  section.dark h2,
+  section.dark h3 {
+    color: white;
   }
 
-  section.lead h2 {
-    font-size: 1.5em;
-    color: #94a3b8;
-    font-weight: 400;
-  }
-
-  /* Light Slides */
-  section.light {
-    background: white;
-    color: var(--primary-dark);
-  }
-
-  section.light h2,
-  section.light h1 {
-    color: var(--primary-dark);
-  }
-
-  section.light h3 {
-    color: var(--primary-blue);
-  }
-
-  section.light code {
-    background: #e0f2fe;
-    color: var(--primary-dark);
-  }
-
-  section.light strong {
-    color: var(--primary-blue);
+  section.dark code {
+    background: rgba(255,255,255,0.15);
+    color: white;
   }
 
   /* Two Column Layout */
@@ -147,103 +125,82 @@ style: |
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2em;
-    margin: 0.8em 0;
+    margin: 0.6em 0;
   }
 
-  .column {
-    padding: 0;
-  }
-
-  /* Compact Boxes */
-  .box {
-    background: rgba(59, 130, 246, 0.1);
-    border: 2px solid rgba(59, 130, 246, 0.3);
-    border-radius: 8px;
-    padding: 0.8em 1em;
-    margin: 0.5em 0;
-  }
-
-  section.light .box {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-  }
-
-  /* Small Badges */
+  /* Badges - INLINE */
   .badge {
     display: inline-block;
-    padding: 0.25em 0.6em;
-    background: rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
+    padding: 0.25em 0.65em;
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
     font-size: 0.75em;
     font-weight: 500;
-    margin: 0.2em 0.3em 0.2em 0;
-    border: 1px solid rgba(59, 130, 246, 0.4);
+    margin-right: 0.5em;
+    margin-bottom: 0.3em;
+    color: var(--navy);
+    white-space: nowrap;
   }
 
-  /* Status Icons - Compact */
-  .status-ok::before { content: "✅ "; font-size: 0.9em; }
-  .status-error::before { content: "❌ "; font-size: 0.9em; }
-  .status-warning::before { content: "⚠️ "; font-size: 0.9em; }
+  /* Checkmarks */
+  .check {
+    color: #059669;
+    font-weight: 600;
+    font-size: 0.95em;
+  }
 
-  /* Footer and Header */
+  .check::before {
+    content: "✓ ";
+  }
+
+  /* Footer - RIGHT BOTTOM CORNER */
   footer {
+    position: absolute;
+    right: 70px;
+    bottom: 30px;
+    left: auto;
+    text-align: right;
     font-size: 0.6em;
-    color: rgba(255, 255, 255, 0.5);
+    color: #94a3b8;
   }
 
-  section.light footer {
-    color: rgba(0, 0, 0, 0.4);
-  }
-
-  header {
-    font-size: 0.6em;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  /* Image Sizing */
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Prevent Overflow */
-  section {
-    overflow: hidden;
+  section.dark footer {
+    color: rgba(255,255,255,0.5);
   }
 
 header: ''
-footer: '**Marty Kaiser** | Ironhack DevOps Bootcamp 2025'
+footer: 'Marty Kaiser | Ironhack DevOps 2025'
 ---
 
-<!-- _class: lead -->
+<!-- _class: dark -->
 
 # Multistack App on Kubernetes
 
 ## Deploying a Voting Application to AWS EKS
 
-![bg right:35% 85%](BTFF_Kubernetes.png)
+![bg right:35% 90%](BTFF_Kubernetes.png)
 
-<span class="badge">Python</span> <span class="badge">Node.js</span> <span class="badge">.NET</span> <span class="badge">Redis</span> <span class="badge">PostgreSQL</span>
+<span class="badge">Python</span><span class="badge">Node.js</span><span class="badge">.NET</span><span class="badge">Redis</span><span class="badge">PostgreSQL</span>
 
 ---
-
-<!-- _class: light -->
 
 ## Project Overview
 
 <div class="columns">
-<div class="column">
+<div>
 
 ### The Challenge
 - Multi-language microservices
 - Real-time voting system
 - Message queue processing
-- Production-ready on Kubernetes
+- Production-ready Kubernetes
 
 </div>
-<div class="column">
+<div>
 
 ### Tech Stack
+
 **Vote:** Python/Flask
 **Worker:** .NET 7
 **Result:** Node.js/Express
@@ -258,141 +215,130 @@ footer: '**Marty Kaiser** | Ironhack DevOps Bootcamp 2025'
 ## Architecture
 
 ```
-┌─────────────┐
-│   Browser   │ → vote.marty.ironhack.com
-└──────┬──────┘   result.marty.ironhack.com
-       │
-       ▼
-┌─────────────────────────────────────┐
-│  AWS ELB + NGINX Ingress            │
-└──────┬──────────────────┬───────────┘
-       │                  │
-       ▼                  ▼
-  ┌─────────┐        ┌─────────┐
-  │  Vote   │        │ Result  │
-  │ (Flask) │        │(Node.js)│
-  └────┬────┘        └────┬────┘
-       │ Writes           │ Reads
-       ▼                  │
-  ┌─────────┐             │
-  │  Redis  │             │
-  └────┬────┘             │
-       │ Consume          │
-       ▼                  │
-  ┌─────────┐             │
-  │ Worker  │             │
-  │  (.NET) │             │
-  └────┬────┘             │
-       │ Writes           │
-       ▼                  ▼
-  ┌──────────────────────┐
-  │     PostgreSQL       │
-  └──────────────────────┘
+Browser (User)
+   ↓
+AWS ELB + NGINX Ingress
+   ↓
+╔════════════════════════════════════╗
+║   Kubernetes Cluster (EKS)         ║
+║                                    ║
+║  ┌────────────┐   ┌─────────────┐ ║
+║  │ Vote Pod   │   │ Result Pod  │ ║
+║  │ (Flask)    │   │ (Node.js)   │ ║
+║  └─────┬──────┘   └──────┬──────┘ ║
+║        │ Writes           │ Reads  ║
+║        ↓                  ↓        ║
+║  ┌──────────┐      ┌────────────┐ ║
+║  │Redis Pod │      │Postgres Pod│ ║
+║  └────┬─────┘      └──────┬─────┘ ║
+║       │ Consume           ↑        ║
+║       ↓                   │        ║
+║  ┌────────────┐           │        ║
+║  │ Worker Pod │───────────┘        ║
+║  │ (.NET)     │  Writes            ║
+║  └────────────┘                    ║
+╚════════════════════════════════════╝
 ```
 
 ---
 
 ## CI/CD Pipeline
 
-### GitHub Actions Workflow
-
 **Trigger:** Push to `main` branch
 
-**1. Build Phase**
+**Build Phase:**
 - Build Docker images (vote, worker, result)
 - Push to Docker Hub
 
-**2. Deploy Phase**
+**Deploy Phase:**
 - Configure AWS credentials
 - Connect to EKS cluster
 - Create Kubernetes secrets
-- Apply manifests: `kubectl apply -f K8s/`
+- Apply manifests
 
-<span class="badge">Deployment Time: 7-10 minutes</span>
+<span class="badge">Deployment: 7-10 min</span>
 
 ---
 
 ## Problem 1: Infrastructure Issues
 
-### Symptoms
+**Symptoms:**
 ```
 Browser: DNS_PROBE_FINISHED_NXDOMAIN
 Worker:  Waiting for db... Giving up
 ```
 
-### Root Causes
+**Root Causes:**
 
-**Cluster Migration:** `ironhack-main` → `ironhack-main-2`
-- ELB changed, old DNS entries invalid
+**Cluster Migration** `ironhack-main` → `ironhack-main-2`
+- ELB changed, old DNS invalid
 
-**Naming Inconsistencies**
-- Code: `redis`, `db`, `postgres`
-- K8s: `marty-svc-redis`, `marty-svc-postgres`
+**Naming Chaos** - Code vs Kubernetes
+- Code: `redis`, `db` | K8s: `marty-svc-redis`, `marty-svc-postgres`
 
-**Missing Secrets:** Database credentials not created
+**Missing Secrets** - Database credentials never created
 
 ---
 
 ## Solution 1: Infrastructure Fixes
 
 <div class="columns">
-<div class="column">
+<div>
 
-### Networking
-<span class="status-ok">Subdomain routing</span>
-<span class="status-ok">vote.marty.ironhack.com</span>
-<span class="status-ok">No path rewriting</span>
+**Networking**
+<p class="check">Subdomain routing</p>
+<p class="check">vote.marty.ironhack.com</p>
+<p class="check">No path rewriting</p>
 
-### Security
-<span class="status-ok">GitHub Secrets → K8s</span>
-<span class="status-ok">Automated injection</span>
-<span class="status-ok">CI/CD automation</span>
+**Security**
+<p class="check">GitHub Secrets → K8s</p>
+<p class="check">Automated injection</p>
 
 </div>
-<div class="column">
+<div>
 
-### Configuration
-<span class="status-ok">Environment variables</span>
-<span class="status-ok">Service discovery</span>
-<span class="status-ok">Proper naming</span>
+**Configuration**
+<p class="check">Environment variables</p>
+<p class="check">Service discovery</p>
+<p class="check">Proper naming</p>
 
-### Ingress
-<span class="status-ok">ingressClassName: nginx</span>
-<span class="status-ok">Explicit hostnames</span>
-<span class="status-ok">Modern API version</span>
+**Ingress**
+<p class="check">ingressClassName: nginx</p>
+<p class="check">Explicit hostnames</p>
 
 </div>
 </div>
 
 ---
 
-<!-- _class: lead -->
+<!-- _class: dark -->
 
 # Problem 2
+
 ## The Wildcard Ingress Mystery
 
-![bg right:40% 80%](Gaga_or_Taylor.jpg)
+![bg right:40% 85%](Gaga_or_Taylor.jpg)
 
 ---
 
 ## Wildcard Ingress Issue
 
-### What Happened?
+**What Happened?**
 
 Accessing `vote.marty.ironhack.com` showed **Taylor Swift vs Lady Gaga** instead of **Cats vs Dogs**.
 
-### Root Cause
+**Root Cause:**
 
 ```yaml
 # Another team's Ingress
 spec:
   rules:
-  - http:  # ⚠️ No "host:" = catches ALL traffic
+  - http:  # No "host:" = catches ALL
       paths:
       - path: /vote
 ```
 
-**Issue:** Ingress without `host` field acts as catch-all
+Ingress without `host` field acts as catch-all.
 
 ---
 
@@ -403,7 +349,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: marty-ingress
-  namespace: marty
 spec:
   ingressClassName: nginx
   rules:
@@ -415,10 +360,7 @@ spec:
         backend:
           service:
             name: marty-svc-vote
-            port:
-              number: 80
-  - host: result.marty.ironhack.com
-    # ... similar configuration
+            port: {number: 80}
 ```
 
 **Key Learning:** Always specify explicit `host` values
@@ -428,14 +370,14 @@ spec:
 ## Problem 3: Hardcoded Connections
 
 <div class="columns">
-<div class="column">
+<div>
 
-### Vote App (Flask)
+**Vote (Flask)**
 ```python
-# ❌ Before
+# Before
 Redis(host="redis")
 
-# ✅ After
+# After
 redis_host = os.getenv(
   'REDIS_HOST', 'redis'
 )
@@ -443,14 +385,14 @@ Redis(host=redis_host)
 ```
 
 </div>
-<div class="column">
+<div>
 
-### Result App (Node.js)
+**Result (Node.js)**
 ```javascript
-// ❌ Before
-'postgres://postgres:postgres@db'
+// Before
+'postgres://user:pass@db'
 
-// ✅ After
+// After
 `postgres://${process.env.POSTGRES_USER}:
 ${process.env.POSTGRES_PASSWORD}@
 ${process.env.POSTGRES_HOST}`
@@ -464,9 +406,9 @@ ${process.env.POSTGRES_HOST}`
 ## Problem 3: Worker Variables
 
 <div class="columns">
-<div class="column">
+<div>
 
-### Wrong Config
+**Wrong Config**
 ```yaml
 env:
   - name: POSTGRES_HOST
@@ -476,9 +418,9 @@ env:
 Code expected different names!
 
 </div>
-<div class="column">
+<div>
 
-### Corrected
+**Corrected**
 ```yaml
 env:
   - name: DB_HOST
@@ -487,7 +429,6 @@ env:
     valueFrom:
       secretKeyRef:
         name: marty-db-credentials
-        key: POSTGRES_USER
 ```
 
 </div>
@@ -495,45 +436,41 @@ env:
 
 ---
 
-<!-- _class: light -->
-
 ## Summary
 
-### What We Accomplished
+**What We Accomplished:**
 
-<span class="status-ok">Multi-language microservices on Kubernetes</span>
-<span class="status-ok">AWS ELB + NGINX Ingress routing</span>
-<span class="status-ok">Secure secret management</span>
-<span class="status-ok">Automated CI/CD pipeline</span>
-<span class="status-ok">Real-time voting with WebSockets</span>
+<p class="check">Multi-language microservices on Kubernetes</p>
+<p class="check">AWS ELB + NGINX Ingress routing</p>
+<p class="check">Secure secret management</p>
+<p class="check">Automated CI/CD pipeline</p>
 
-### Skills Demonstrated
+**Skills Demonstrated:**
 
-**Kubernetes:** Deployments, Services, Ingress, Secrets
-**AWS:** EKS, ELB, IAM permissions
-**Docker:** Multi-stage builds, image management
-**Networking:** DNS resolution, load balancing
-**CI/CD:** GitHub Actions automation
+**Kubernetes** - Deployments, Services, Ingress, Secrets
+**AWS** - EKS, ELB, IAM
+**Docker** - Multi-stage builds
+**CI/CD** - GitHub Actions
 
 ---
 
-<!-- _class: lead -->
+<!-- _class: dark -->
 
 # Questions?
 
-![bg 60%](kubernetes-meme_final_page.jpg)
+![bg 65%](kubernetes-meme_final_page.jpg)
 
 ---
 
-<!-- _class: lead -->
+<!-- _class: dark -->
 
 # Thank You!
 
-### Project Repository
+**Project Repository**
 https://github.com/kaiser-data/marty-voting-app
 
-### Live Application
-**Vote:** http://vote.marty.ironhack.com
-**Result:** http://result.marty.ironhack.com
+**Live Application**
+Vote: http://vote.marty.ironhack.com
+Result: http://result.marty.ironhack.com
 
 ---
