@@ -217,27 +217,32 @@ footer: 'Marty Kaiser | Ironhack DevOps 2025'
 ```
 Browser (User)
    ↓
-AWS ELB + NGINX Ingress
+AWS ELB (Load Balancer)
    ↓
-╔════════════════════════════════════╗
-║   Kubernetes Cluster (EKS)         ║
-║                                    ║
-║  ┌────────────┐   ┌─────────────┐ ║
-║  │ Vote Pod   │   │ Result Pod  │ ║
-║  │ (Flask)    │   │ (Node.js)   │ ║
-║  └─────┬──────┘   └──────┬──────┘ ║
-║        │ Writes           │ Reads  ║
-║        ↓                  ↓        ║
-║  ┌──────────┐      ┌────────────┐ ║
-║  │Redis Pod │      │Postgres Pod│ ║
-║  └────┬─────┘      └──────┬─────┘ ║
-║       │ Consume           ↑        ║
-║       ↓                   │        ║
-║  ┌────────────┐           │        ║
-║  │ Worker Pod │───────────┘        ║
-║  │ (.NET)     │  Writes            ║
-║  └────────────┘                    ║
-╚════════════════════════════════════╝
+╔═══════════════════════════════════════╗
+║   Kubernetes Cluster (EKS)            ║
+║                                       ║
+║  ┌─────────────────────────────────┐ ║
+║  │ NGINX Ingress Controller Pod    │ ║
+║  │ (Pre-installed infrastructure)  │ ║
+║  └──────────┬──────────────┬───────┘ ║
+║             │              │          ║
+║  ┌──────────▼──┐   ┌───────▼──────┐ ║
+║  │ Vote Pod    │   │ Result Pod   │ ║
+║  │ (Flask)     │   │ (Node.js)    │ ║
+║  └──────┬──────┘   └───────┬──────┘ ║
+║         │ Writes            │ Reads  ║
+║         ↓                   ↓        ║
+║  ┌───────────┐       ┌────────────┐ ║
+║  │ Redis Pod │       │Postgres Pod│ ║
+║  └─────┬─────┘       └──────┬─────┘ ║
+║        │ Consume            ↑        ║
+║        ↓                    │        ║
+║  ┌─────────────┐            │        ║
+║  │ Worker Pod  │────────────┘        ║
+║  │ (.NET)      │  Writes             ║
+║  └─────────────┘                     ║
+╚═══════════════════════════════════════╝
 ```
 
 ---
@@ -251,10 +256,9 @@ AWS ELB + NGINX Ingress
 - Push to Docker Hub
 
 **Deploy Phase:**
-- Configure AWS credentials
 - Connect to EKS cluster
 - Create Kubernetes secrets
-- Apply manifests
+- Apply manifests: `kubectl apply -f K8s/`
 
 <span class="badge">Deployment: 7-10 min</span>
 

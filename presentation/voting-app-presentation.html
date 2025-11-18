@@ -871,27 +871,32 @@ section.dark footer {
 <h2 id="architecture">Architecture</h2>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code>Browser (User)
    ↓
-AWS ELB + NGINX Ingress
+AWS ELB (Load Balancer)
    ↓
-╔════════════════════════════════════╗
-║   Kubernetes Cluster (EKS)         ║
-║                                    ║
-║  ┌────────────┐   ┌─────────────┐ ║
-║  │ Vote Pod   │   │ Result Pod  │ ║
-║  │ (Flask)    │   │ (Node.js)   │ ║
-║  └─────┬──────┘   └──────┬──────┘ ║
-║        │ Writes           │ Reads  ║
-║        ↓                  ↓        ║
-║  ┌──────────┐      ┌────────────┐ ║
-║  │Redis Pod │      │Postgres Pod│ ║
-║  └────┬─────┘      └──────┬─────┘ ║
-║       │ Consume           ↑        ║
-║       ↓                   │        ║
-║  ┌────────────┐           │        ║
-║  │ Worker Pod │───────────┘        ║
-║  │ (.NET)     │  Writes            ║
-║  └────────────┘                    ║
-╚════════════════════════════════════╝
+╔═══════════════════════════════════════╗
+║   Kubernetes Cluster (EKS)            ║
+║                                       ║
+║  ┌─────────────────────────────────┐ ║
+║  │ NGINX Ingress Controller Pod    │ ║
+║  │ (Pre-installed infrastructure)  │ ║
+║  └──────────┬──────────────┬───────┘ ║
+║             │              │          ║
+║  ┌──────────▼──┐   ┌───────▼──────┐ ║
+║  │ Vote Pod    │   │ Result Pod   │ ║
+║  │ (Flask)     │   │ (Node.js)    │ ║
+║  └──────┬──────┘   └───────┬──────┘ ║
+║         │ Writes            │ Reads  ║
+║         ↓                   ↓        ║
+║  ┌───────────┐       ┌────────────┐ ║
+║  │ Redis Pod │       │Postgres Pod│ ║
+║  └─────┬─────┘       └──────┬─────┘ ║
+║        │ Consume            ↑        ║
+║        ↓                    │        ║
+║  ┌─────────────┐            │        ║
+║  │ Worker Pod  │────────────┘        ║
+║  │ (.NET)      │  Writes             ║
+║  └─────────────┘                     ║
+╚═══════════════════════════════════════╝
 </code></pre>
 <footer>Marty Kaiser | Ironhack DevOps 2025</footer>
 </section>
@@ -1071,10 +1076,9 @@ section.dark footer {
 </ul>
 <p><strong>Deploy Phase:</strong></p>
 <ul>
-<li>Configure AWS credentials</li>
 <li>Connect to EKS cluster</li>
 <li>Create Kubernetes secrets</li>
-<li>Apply manifests</li>
+<li>Apply manifests: <code>kubectl apply -f K8s/</code></li>
 </ul>
 <p><span class="badge">Deployment: 7-10 min</span></p>
 <footer>Marty Kaiser | Ironhack DevOps 2025</footer>
