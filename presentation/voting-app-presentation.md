@@ -217,7 +217,7 @@ footer: 'Marty Kaiser | Ironhack DevOps 2025'
 ```
 Browser (User)
    ↓
-AWS ELB (Load Balancer)
+AWS ELB (Auto-provisioned)
    ↓
 ╔═══════════════════════════════════════╗
 ║   Kubernetes Cluster (EKS)            ║
@@ -312,6 +312,58 @@ Worker:  Waiting for db... Giving up
 
 </div>
 </div>
+
+---
+
+## Deep Dive: Why CSS Failed to Load
+
+### Path-Based Routing Problem
+
+**Original Ingress (Broken):**
+```yaml
+- host: marty.ironhack.com
+  paths:
+    - path: /vote  # App expects to be at root!
+```
+
+**Request Flow:**
+```
+1. Browser → http://marty.ironhack.com/vote
+2. Flask returns HTML with: <link href="/static/style.css">
+3. Browser requests → http://marty.ironhack.com/static/style.css
+4. Ingress: No route for /static ❌ 404 Error!
+```
+
+**The App's Perspective:**
+- Flask thinks it's at path: `/`
+- But Ingress places it at: `/vote`
+- Static files resolve to: `/static/...` (wrong!)
+- Should resolve to: `/vote/static/...`
+
+---
+
+## Solution: Subdomain Routing
+
+**Fixed Ingress:**
+```yaml
+- host: vote.marty.ironhack.com
+  paths:
+    - path: /  # App IS at root now!
+```
+
+**Request Flow (Working):**
+```
+1. Browser → http://vote.marty.ironhack.com/
+2. Flask returns HTML with: <link href="/static/style.css">
+3. Browser requests → http://vote.marty.ironhack.com/static/style.css
+4. Ingress routes / → Flask ✅ CSS loads!
+```
+
+**Why This Works:**
+- App runs at root path `/`
+- Static files at `/static/...` resolve correctly
+- No path rewriting needed
+- Clean URLs for each service
 
 ---
 
