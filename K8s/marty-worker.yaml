@@ -21,16 +21,16 @@ spec:
           env:
             - name: REDIS_HOST
               value: "marty-svc-redis"
-            - name: POSTGRES_HOST
+            - name: DB_HOST
               value: "marty-svc-postgres"
-            - name: POSTGRES_DB
+            - name: DB_NAME
               value: "votes"
-            - name: POSTGRES_USER
+            - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: marty-db-credentials
                   key: POSTGRES_USER
-            - name: POSTGRES_PASSWORD
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: marty-db-credentials
