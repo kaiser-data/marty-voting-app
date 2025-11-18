@@ -48,34 +48,39 @@ Deploy a **multi-language microservices application** to Kubernetes with:
        │
        ▼
 ┌─────────────────────────────────────┐
-│    AWS Elastic Load Balancer        │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│   NGINX Ingress Controller (K8s)    │
+│  AWS ELB + NGINX Ingress (K8s)      │
+│  (Integrated routing layer)         │
 └──────┬──────────────────┬───────────┘
        │                  │
        ▼                  ▼
 ┌─────────────┐    ┌─────────────┐
 │  Vote Pod   │    │ Result Pod  │
+│  (Flask)    │    │  (Node.js)  │
 └──────┬──────┘    └──────┬──────┘
        │                  │
+       │ Writes           │ Reads
        ▼                  │
 ┌─────────────┐           │
-│    Redis    │◄──┬───────┘
-└──────┬──────┘   │
-       │          │
-       ▼          │
-┌─────────────┐   │
-│ Worker Pod  │───┤
-└──────┬──────┘   │
-       │          │
-       ▼          ▼
-┌─────────────────────┐
-│    PostgreSQL       │
-└─────────────────────┘
+│    Redis    │           │
+│   (Queue)   │           │
+└──────┬──────┘           │
+       │                  │
+       │ Consume          │
+       ▼                  │
+┌─────────────┐           │
+│ Worker Pod  │           │
+│   (.NET)    │           │
+└──────┬──────┘           │
+       │                  │
+       │ Writes           │
+       ▼                  ▼
+┌─────────────────────────┐
+│      PostgreSQL         │
+│      (Database)         │
+└─────────────────────────┘
 ```
+
+**Data Flow:** Browser → Vote → Redis → Worker → PostgreSQL → Result → Browser
 
 ---
 
@@ -98,64 +103,68 @@ Deploy a **multi-language microservices application** to Kubernetes with:
 
 ---
 
-## Problem 1: DNS Resolution Chaos
+## Problem 1: Infrastructure & Configuration Hell
 
-### The Issue
+### Multiple Issues Stacking Up
 ```
 Browser: "DNS_PROBE_FINISHED_NXDOMAIN"
+Worker: "Waiting for db... Giving up"
 ```
 
 ### Root Causes
-1. **Outdated /etc/hosts entry** pointing to deleted ELB
-   ```bash
-   # ❌ Old entry
-   ac4ad35e3a4964c368b127366d7be51a...elb.amazonaws.com  marty.ironhack.com
-   ```
-2. **Hostname mismatch:** Ingress configured for `marty-v1.ironhack.com`
-3. **Path rewriting issues:** Flask/Node apps expect `/` not `/vote`
+1. **Cluster Migration:** Moving from `ironhack-main` → `ironhack-main-2`
+   - ELB changed, old DNS entries invalid
+2. **Naming Inconsistencies:**
+   - Code: `redis`, `db`, `postgres`
+   - K8s: `marty-svc-redis`, `marty-svc-postgres`
+3. **Missing Secrets:** `marty-db-credentials` never created
+4. **Path Routing:** Flask/Node apps expect `/` not `/vote`, `/result`
 
-### Solution
-- ✅ Subdomain-based routing: `vote.marty.ironhack.com`
-- ✅ Direct IP mapping: `13.57.86.174 → vote.marty.ironhack.com`
+### Solutions Applied
+- ✅ Subdomain routing: `vote.marty.ironhack.com` (no path rewriting)
+- ✅ GitHub Secrets → K8s Secrets automation
+- ✅ Environment variables for all connections
 - ✅ Modern Ingress: `ingressClassName: nginx`
 
 ---
 
 <!-- _class: lead -->
 
-# Problem 2: Taylor Swift vs Lady Gaga
+# Problem 2: The Wildcard Ingress Mystery
 
-### Or: The Wildcard Ingress War 🎤
+### Unexpected Traffic Routing 🎤
 
 ![bg right:50% 90%](Gaga_or_Taylor.jpg)
 
 ---
 
-## The Wildcard Ingress Battle
+## The Wildcard Ingress Challenge
 
 ### What Happened?
-Accessing `vote.marty.ironhack.com` showed **Jakob's voting app** (Taylor Swift vs Lady Gaga) instead of mine (Cats vs Dogs)!
+Accessing `vote.marty.ironhack.com` unexpectedly displayed a different voting application (Taylor Swift vs Lady Gaga) instead of the intended Cats vs Dogs interface.
 
-### The Culprit
+### Root Cause Analysis
 ```yaml
-# Jakob's Ingress
+# Another team's Ingress configuration
 spec:
   rules:
-  - http:  # ← No "host:" = matches EVERYTHING!
+  - http:  # ← No "host:" field = matches ALL traffic!
       paths:
       - path: /vote
 ```
 
-### The Fix
+**Issue**: An Ingress without a specified `host` field acts as a catch-all, matching requests that don't explicitly match other rules.
+
+### The Solution
 ```yaml
-# My Ingress - Specific hostnames
+# Updated Ingress - Explicit hostname matching
 spec:
   rules:
-  - host: vote.marty.ironhack.com    # ✅ Explicit
-  - host: result.marty.ironhack.com  # ✅ Explicit
+  - host: vote.marty.ironhack.com    # ✅ Specific routing
+  - host: result.marty.ironhack.com  # ✅ Prevents conflicts
 ```
 
-**Lesson:** Wildcard Ingress rules catch all unmatched traffic!
+**Key Learning**: Always specify explicit `host` values in Ingress rules to prevent unintended traffic routing in shared Kubernetes clusters.
 
 ---
 

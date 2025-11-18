@@ -48,34 +48,38 @@
        │
        ▼
 ┌─────────────────────────────────────┐
-│    AWS Elastic Load Balancer        │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│   NGINX Ingress Controller (K8s)    │
+│  AWS ELB + NGINX Ingress (K8s)      │
+│  (Integrated routing layer)         │
 └──────┬──────────────────┬───────────┘
        │                  │
        ▼                  ▼
 ┌─────────────┐    ┌─────────────┐
 │  Vote Pod   │    │ Result Pod  │
+│  (Flask)    │    │  (Node.js)  │
 └──────┬──────┘    └──────┬──────┘
        │                  │
+       │ Writes           │ Reads
        ▼                  │
 ┌─────────────┐           │
-│    Redis    │◄──┬───────┘
-└──────┬──────┘   │
-       │          │
-       ▼          │
-┌─────────────┐   │
-│ Worker Pod  │───┤
-└──────┬──────┘   │
-       │          │
-       ▼          ▼
-┌─────────────────────┐
-│    PostgreSQL       │
-└─────────────────────┘
+│    Redis    │           │
+│   (Queue)   │           │
+└──────┬──────┘           │
+       │                  │
+       │ Consume          │
+       ▼                  │
+┌─────────────┐           │
+│ Worker Pod  │           │
+│   (.NET)    │           │
+└──────┬──────┘           │
+       │                  │
+       │ Writes           │
+       ▼                  ▼
+┌─────────────────────────┐
+│      PostgreSQL         │
+│      (Database)         │
+└─────────────────────────┘
 </code></pre>
+<p><strong>Data Flow:</strong> Browser → Vote → Redis → Worker → PostgreSQL → Result → Browser</p>
 <footer>Marty Kaiser | 2025</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="4" data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-theme="default" lang="en-US" data-marpit-pagination="4" style="--paginate:true;--background-color:#fff;--background-image:url('https://marp.app/assets/hero-background.svg');--header:Multistack App on Kubernetes | Ironhack Project;--footer:Marty Kaiser | 2025;--theme:default;background-color:#fff;background-image:url('https://marp.app/assets/hero-background.svg');background-position:center;background-repeat:no-repeat;background-size:cover;" data-marpit-pagination-total="12">
@@ -105,23 +109,32 @@
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-theme="default" lang="en-US" data-marpit-pagination="5" style="--paginate:true;--background-color:#fff;--background-image:url('https://marp.app/assets/hero-background.svg');--header:Multistack App on Kubernetes | Ironhack Project;--footer:Marty Kaiser | 2025;--theme:default;background-color:#fff;background-image:url('https://marp.app/assets/hero-background.svg');background-position:center;background-repeat:no-repeat;background-size:cover;" data-marpit-pagination-total="12">
 <header>Multistack App on Kubernetes | Ironhack Project</header>
-<h2 id="problem-1-dns-resolution-chaos">Problem 1: DNS Resolution Chaos</h2>
-<h3 id="the-issue">The Issue</h3>
+<h2 id="problem-1-infrastructure--configuration-hell">Problem 1: Infrastructure &amp; Configuration Hell</h2>
+<h3 id="multiple-issues-stacking-up">Multiple Issues Stacking Up</h3>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code>Browser: &quot;DNS_PROBE_FINISHED_NXDOMAIN&quot;
+Worker: &quot;Waiting for db... Giving up&quot;
 </code></pre>
 <h3 id="root-causes">Root Causes</h3>
 <ol>
-<li><strong>Outdated /etc/hosts entry</strong> pointing to deleted ELB<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-bash"><span class="hljs-comment"># <img class="emoji" draggable="false" alt="❌" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/274c.svg" data-marp-twemoji=""/> Old entry</span>
-ac4ad35e3a4964c368b127366d7be51a...elb.amazonaws.com  marty.ironhack.com
-</code></pre>
-</li>
-<li><strong>Hostname mismatch:</strong> Ingress configured for <code>marty-v1.ironhack.com</code></li>
-<li><strong>Path rewriting issues:</strong> Flask/Node apps expect <code>/</code> not <code>/vote</code></li>
-</ol>
-<h3 id="solution">Solution</h3>
+<li><strong>Cluster Migration:</strong> Moving from <code>ironhack-main</code> → <code>ironhack-main-2</code>
 <ul>
-<li><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Subdomain-based routing: <code>vote.marty.ironhack.com</code></li>
-<li><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Direct IP mapping: <code>13.57.86.174 → vote.marty.ironhack.com</code></li>
+<li>ELB changed, old DNS entries invalid</li>
+</ul>
+</li>
+<li><strong>Naming Inconsistencies:</strong>
+<ul>
+<li>Code: <code>redis</code>, <code>db</code>, <code>postgres</code></li>
+<li>K8s: <code>marty-svc-redis</code>, <code>marty-svc-postgres</code></li>
+</ul>
+</li>
+<li><strong>Missing Secrets:</strong> <code>marty-db-credentials</code> never created</li>
+<li><strong>Path Routing:</strong> Flask/Node apps expect <code>/</code> not <code>/vote</code>, <code>/result</code></li>
+</ol>
+<h3 id="solutions-applied">Solutions Applied</h3>
+<ul>
+<li><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Subdomain routing: <code>vote.marty.ironhack.com</code> (no path rewriting)</li>
+<li><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> GitHub Secrets → K8s Secrets automation</li>
+<li><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Environment variables for all connections</li>
 <li><img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Modern Ingress: <code>ingressClassName: nginx</code></li>
 </ul>
 <footer>Marty Kaiser | 2025</footer>
@@ -129,31 +142,32 @@ ac4ad35e3a4964c368b127366d7be51a...elb.amazonaws.com  marty.ironhack.com
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-class="lead" data-theme="default" lang="en-US" class="lead" data-marpit-pagination="6" style="--paginate:true;--background-color:#fff;--background-image:url('https://marp.app/assets/hero-background.svg');--header:Multistack App on Kubernetes | Ironhack Project;--footer:Marty Kaiser | 2025;--class:lead;--theme:default;background-color:#fff;background-image:url('https://marp.app/assets/hero-background.svg');background-position:center;background-repeat:no-repeat;background-size:cover;--marpit-advanced-background-split:50%;" data-marpit-pagination-total="12" data-marpit-advanced-background="background" data-marpit-advanced-background-split="right"><div data-marpit-advanced-background-container="true" data-marpit-advanced-background-direction="horizontal"><figure style="background-image:url(&quot;Gaga_or_Taylor.jpg&quot;);background-size:90%;"></figure></div></section></foreignObject><foreignObject width="50%" height="720"><section id="6" data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-class="lead" data-theme="default" lang="en-US" class="lead" data-marpit-pagination="6" style="--paginate:true;--background-color:#fff;--background-image:url('https://marp.app/assets/hero-background.svg');--header:Multistack App on Kubernetes | Ironhack Project;--footer:Marty Kaiser | 2025;--class:lead;--theme:default;background-color:#fff;background-image:url('https://marp.app/assets/hero-background.svg');background-position:center;background-repeat:no-repeat;background-size:cover;--marpit-advanced-background-split:50%;" data-marpit-pagination-total="12" data-marpit-advanced-background="content" data-marpit-advanced-background-split="right">
 <header>Multistack App on Kubernetes | Ironhack Project</header>
 
-<h1 id="problem-2-taylor-swift-vs-lady-gaga">Problem 2: Taylor Swift vs Lady Gaga</h1>
-<h3 id="or-the-wildcard-ingress-war-%F0%9F%8E%A4">Or: The Wildcard Ingress War <img class="emoji" draggable="false" alt="🎤" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f3a4.svg" data-marp-twemoji=""/></h3>
+<h1 id="problem-2-the-wildcard-ingress-mystery">Problem 2: The Wildcard Ingress Mystery</h1>
+<h3 id="unexpected-traffic-routing-%F0%9F%8E%A4">Unexpected Traffic Routing <img class="emoji" draggable="false" alt="🎤" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f3a4.svg" data-marp-twemoji=""/></h3>
 <footer>Marty Kaiser | 2025</footer>
 </section>
 </foreignObject><foreignObject width="1280" height="720" data-marpit-advanced-background="pseudo"><section data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-class="lead" data-theme="default" lang="en-US" class="lead" data-marpit-pagination="6" style="" data-marpit-pagination-total="12" data-marpit-advanced-background="pseudo" data-marpit-advanced-background-split="right"></section></foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-theme="default" lang="en-US" data-marpit-pagination="7" style="--paginate:true;--background-color:#fff;--background-image:url('https://marp.app/assets/hero-background.svg');--header:Multistack App on Kubernetes | Ironhack Project;--footer:Marty Kaiser | 2025;--theme:default;background-color:#fff;background-image:url('https://marp.app/assets/hero-background.svg');background-position:center;background-repeat:no-repeat;background-size:cover;" data-marpit-pagination-total="12">
 <header>Multistack App on Kubernetes | Ironhack Project</header>
-<h2 id="the-wildcard-ingress-battle">The Wildcard Ingress Battle</h2>
+<h2 id="the-wildcard-ingress-challenge">The Wildcard Ingress Challenge</h2>
 <h3 id="what-happened">What Happened?</h3>
-<p>Accessing <code>vote.marty.ironhack.com</code> showed <strong>Jakob's voting app</strong> (Taylor Swift vs Lady Gaga) instead of mine (Cats vs Dogs)!</p>
-<h3 id="the-culprit">The Culprit</h3>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-yaml"><span class="hljs-comment"># Jakob&#x27;s Ingress</span>
+<p>Accessing <code>vote.marty.ironhack.com</code> unexpectedly displayed a different voting application (Taylor Swift vs Lady Gaga) instead of the intended Cats vs Dogs interface.</p>
+<h3 id="root-cause-analysis">Root Cause Analysis</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-yaml"><span class="hljs-comment"># Another team&#x27;s Ingress configuration</span>
 <span class="hljs-attr">spec:</span>
   <span class="hljs-attr">rules:</span>
-  <span class="hljs-bullet">-</span> <span class="hljs-attr">http:</span>  <span class="hljs-comment"># ← No &quot;host:&quot; = matches EVERYTHING!</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">http:</span>  <span class="hljs-comment"># ← No &quot;host:&quot; field = matches ALL traffic!</span>
       <span class="hljs-attr">paths:</span>
       <span class="hljs-bullet">-</span> <span class="hljs-attr">path:</span> <span class="hljs-string">/vote</span>
 </code></pre>
-<h3 id="the-fix">The Fix</h3>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-yaml"><span class="hljs-comment"># My Ingress - Specific hostnames</span>
+<p><strong>Issue</strong>: An Ingress without a specified <code>host</code> field acts as a catch-all, matching requests that don't explicitly match other rules.</p>
+<h3 id="the-solution">The Solution</h3>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-yaml"><span class="hljs-comment"># Updated Ingress - Explicit hostname matching</span>
 <span class="hljs-attr">spec:</span>
   <span class="hljs-attr">rules:</span>
-  <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">vote.marty.ironhack.com</span>    <span class="hljs-comment"># <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Explicit</span>
-  <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">result.marty.ironhack.com</span>  <span class="hljs-comment"># <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Explicit</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">vote.marty.ironhack.com</span>    <span class="hljs-comment"># <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Specific routing</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">result.marty.ironhack.com</span>  <span class="hljs-comment"># <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/2705.svg" data-marp-twemoji=""/> Prevents conflicts</span>
 </code></pre>
-<p><strong>Lesson:</strong> Wildcard Ingress rules catch all unmatched traffic!</p>
+<p><strong>Key Learning</strong>: Always specify explicit <code>host</code> values in Ingress rules to prevent unintended traffic routing in shared Kubernetes clusters.</p>
 <footer>Marty Kaiser | 2025</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-theme="default" lang="en-US" data-marpit-pagination="8" style="--paginate:true;--background-color:#fff;--background-image:url('https://marp.app/assets/hero-background.svg');--header:Multistack App on Kubernetes | Ironhack Project;--footer:Marty Kaiser | 2025;--theme:default;background-color:#fff;background-image:url('https://marp.app/assets/hero-background.svg');background-position:center;background-repeat:no-repeat;background-size:cover;" data-marpit-pagination-total="12">
@@ -184,7 +198,7 @@ Redis(host=os.getenv(<span class="hljs-string">&#x27;REDIS_HOST&#x27;</span>, <s
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-background-color="#fff" data-background-image="url('https://marp.app/assets/hero-background.svg')" data-header="Multistack App on Kubernetes | Ironhack Project" data-footer="Marty Kaiser | 2025" data-theme="default" lang="en-US" data-marpit-pagination="9" style="--paginate:true;--background-color:#fff;--background-image:url('https://marp.app/assets/hero-background.svg');--header:Multistack App on Kubernetes | Ironhack Project;--footer:Marty Kaiser | 2025;--theme:default;background-color:#fff;background-image:url('https://marp.app/assets/hero-background.svg');background-position:center;background-repeat:no-repeat;background-size:cover;" data-marpit-pagination-total="12">
 <header>Multistack App on Kubernetes | Ironhack Project</header>
-<h2 id="solutions-applied">Solutions Applied</h2>
+<h2 id="solutions-applied-1">Solutions Applied</h2>
 <h3 id="%F0%9F%94%90-security"><img class="emoji" draggable="false" alt="🔐" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@16.0.1/assets/svg/1f510.svg" data-marp-twemoji=""/> Security</h3>
 <ul>
 <li>GitHub Secrets → Kubernetes Secrets</li>
