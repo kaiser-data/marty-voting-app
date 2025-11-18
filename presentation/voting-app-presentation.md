@@ -448,7 +448,7 @@ env:
 **Skills Demonstrated:**
 
 **Kubernetes** - Deployments, Services, Ingress, Secrets
-**AWS** - EKS, ELB, IAM
+**AWS** - EKS, ELB
 **Docker** - Multi-stage builds
 **CI/CD** - GitHub Actions
 
